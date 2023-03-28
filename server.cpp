@@ -16,8 +16,8 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
 
-int __cdecl main(void) 
-{
+int __cdecl main(void) {
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
     WSADATA wsaData;
     int iResult;
 
@@ -80,25 +80,29 @@ int __cdecl main(void)
         WSACleanup();
         return 1;
     }
-    
-    for (int it = 0; it<3; it++){
-    // Accept a client socket
-    ClientSocket = accept(ListenSocket, NULL, NULL);
-    if (ClientSocket == INVALID_SOCKET) {
-        printf("accept failed with error: %d\n", WSAGetLastError());
-        closesocket(ListenSocket);
-        WSACleanup();
-        return 1;
-    }
+    char stop = ' ';
+    while (stop != '0'){
+        // Accept a client socket
+        printf("Waiting...\n");
+        ClientSocket = accept(ListenSocket, NULL, NULL);
+        if (ClientSocket == INVALID_SOCKET) {
+            printf("accept failed with error: %d\n", WSAGetLastError());
+            closesocket(ListenSocket);
+            WSACleanup();
+            return 1;
+        }
         // Receive until the peer shuts down the connection
         do {
-
+            printf(".");
             iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
             if (iResult > 0) {
                 printf("Bytes received: %d\n", iResult);
-                printf("recvBuff: %.*s\n\n", iResult, recvbuf);
-
-            // Echo the buffer back to the sender
+                recvbuf[iResult] = '\0';
+                printf("recvBuff: %s\n", recvbuf);
+                if (strcmp(recvbuf,"great") == 0) printf("IT'S GREAT\n\n");
+                if (strcmp(recvbuf,"PYTHON") == 0) system("python myPythonTest.py thisIsMyCFile");
+                stop = recvbuf[0];
+                // Echo the buffer back to the sender
                 iSendResult = send( ClientSocket, recvbuf, iResult, 0 );
                 if (iSendResult == SOCKET_ERROR) {
                     printf("send failed with error: %d\n", WSAGetLastError());
@@ -107,7 +111,7 @@ int __cdecl main(void)
                     return 1;
                 }
                 printf("Bytes sent: %d\n", iSendResult);
-            }
+            } 
             else if (iResult == 0)
                 printf("Connection closing...\n");
             else  {
@@ -127,7 +131,8 @@ int __cdecl main(void)
             WSACleanup();
             return 1;
         }
-
+        printf("-");
+        // WSACleanup();
         closesocket(ClientSocket);
         ClientSocket = INVALID_SOCKET;
     }
