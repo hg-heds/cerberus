@@ -6,6 +6,7 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
@@ -19,6 +20,10 @@
 
 int __cdecl main(int argc, char **argv) 
 {
+    
+    // srand (time(NULL));
+    // int a = rand() % 10;
+    // if (a>2) return 0;
     WSADATA wsaData;
     SOCKET ConnectSocket = INVALID_SOCKET;
     struct addrinfo *result = NULL,
