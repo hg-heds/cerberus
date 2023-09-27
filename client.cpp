@@ -1,3 +1,6 @@
+
+// gcc client.cpp -o client.exe -lws2_32 -lwsock32
+
 #define WIN32_LEAN_AND_MEAN
 #define _WIN32_WINNT 0x501
 
@@ -18,12 +21,12 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
 
-int __cdecl main(int argc, char **argv) 
-{
+int __cdecl main(int argc, char **argv) {
     
     // srand (time(NULL));
     // int a = rand() % 10;
     // if (a>2) return 0;
+
     WSADATA wsaData;
     SOCKET ConnectSocket = INVALID_SOCKET;
     struct addrinfo *result = NULL,
@@ -35,14 +38,14 @@ int __cdecl main(int argc, char **argv)
     int recvbuflen = DEFAULT_BUFLEN;
     
     // Validate the parameters
-    if (argc != 2 && argc != 3) {
-        printf("usage: %s server-name [message]\n", argv[0]);
+    if (argc != 3 && argc != 4) {
+        printf("usage: %s address port [message]\n", argv[0]);
         return 1;
     }
 
-    if (argc == 3) {
+    if (argc == 4) {
         sendbuf = NULL;
-        sendbuf = argv[2];
+        sendbuf = argv[3];
     }
 
     // Initialize Winsock
@@ -58,7 +61,7 @@ int __cdecl main(int argc, char **argv)
     hints.ai_protocol = IPPROTO_TCP;
 
     // Resolve the server address and port
-    iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
+    iResult = getaddrinfo(argv[1], argv[2], &hints, &result);
     if ( iResult != 0 ) {
         printf("getaddrinfo failed with error: %d\n", iResult);
         WSACleanup();
@@ -119,8 +122,13 @@ int __cdecl main(int argc, char **argv)
     do {
 
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
-        if ( iResult > 0 )
+        if ( iResult > 0 ){
             printf("Bytes received: %d\n", iResult);
+            for (int i=0; i<iResult; i++){
+                printf("%c",recvbuf[i]);
+            }
+            printf("\n");
+        }
         else if ( iResult == 0 )
             printf("Connection closed\n");
         else
